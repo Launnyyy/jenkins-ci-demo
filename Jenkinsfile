@@ -76,7 +76,7 @@ pipeline {
       }
     }
 
-   stage('Security Scan') {
+  stage('Security Scan') {
   steps {
     sh '''
       docker run --rm \
@@ -91,6 +91,7 @@ pipeline {
     '''
   }
 }
+
 
 
 
