@@ -2,15 +2,15 @@ pipeline {
   agent any
 
   tools {
-    nodejs "Node18"   // must match the name in Manage Jenkins → Global Tool Configuration
+    nodejs "Node18"  
   }
 
   environment {
     DOCKERHUB_CREDENTIALS_ID = 'dockerhub-creds'
-    DOCKERHUB_REPO           = 'ujjwal882/ci-demo-app'   // ✅ updated with your DockerHub username
+    DOCKERHUB_REPO           = 'ujjwal882/ci-demo-app'
     IMAGE_TAG                = "${env.GIT_COMMIT}"
     SONARQUBE_ENV            = 'SonarQubeServer'
-    SONAR_PROJECT_KEY        = 'ci-demo-app'             // ✅ make sure this exists in SonarQube
+    SONAR_PROJECT_KEY        = 'ci-demo-app'
   }
 
   options {
@@ -23,7 +23,6 @@ pipeline {
       steps {
         checkout scm
         sh 'node -v || true'
-        sh 'npm -v || true'
         sh 'docker -v || true'
       }
     }
@@ -53,7 +52,7 @@ pipeline {
                 -Dsonar.sources=. \
                 -Dsonar.exclusions=**/node_modules/**,**/*.test.js \
                 -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
-                -Dsonar.login=$SONAR_TOKEN
+                -Dsonar.token=$SONAR_TOKEN
             '''
           }
         }
@@ -62,7 +61,7 @@ pipeline {
 
     stage('Quality Gate') {
       steps {
-        timeout(time: 5, unit: 'MINUTES') {
+        timeout(time: 2, unit: 'MINUTES') {
           waitForQualityGate abortPipeline: true
         }
       }
