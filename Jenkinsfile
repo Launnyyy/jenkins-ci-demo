@@ -10,7 +10,7 @@ pipeline {
     DOCKERHUB_REPO           = 'ujjwal882/ci-demo-app'
     IMAGE_TAG                = "${env.GIT_COMMIT}"
     SONARQUBE_ENV            = 'SonarQubeServer'
-    SONAR_PROJECT_KEY        = 'ci-demo-api'
+    SONAR_PROJECT_KEY        = 'ci-demo-app'
   }
 
   options {
@@ -62,7 +62,7 @@ pipeline {
 
     stage('Quality Gate') {
       steps {
-        timeout(time: 10, unit: 'MINUTES') {
+        timeout(time: 2, unit: 'MINUTES') {
           waitForQualityGate abortPipeline: true
         }
       }
@@ -76,17 +76,32 @@ pipeline {
       }
     }
 
-    stage('Security Scan') {
+    stage('Security Scan - npm audit') {
       steps {
         sh '''
+          echo "Running npm audit..."
+          npm audit --audit-level=high || true
+        '''
+      }
+    }
+
+    stage('Security Scan - Trivy') {
+      steps {
+        sh '''
+          echo "Running Trivy scan..."
           docker run --rm \
             -v /var/run/docker.sock:/var/run/docker.sock \
             aquasec/trivy:latest image \
-            --exit-code 1 --severity CRITICAL,HIGH \
-            ${DOCKERHUB_REPO}:${IMAGE_TAG} || {
-              echo "Trivy found CRITICAL/HIGH vulnerabilities."
-              exit 1
-            }
+            --exit-code 0 --severity CRITICAL,HIGH \
+            ${DOCKERHUB_REPO}:${IMAGE_TAG} > trivy-report.txt
+
+          if grep -q "CRITICAL\\|HIGH" trivy-report.txt; then
+            echo "❌ Trivy found vulnerabilities!"
+            cat trivy-report.txt
+            exit 1
+          else
+            echo "✅ No CRITICAL/HIGH vulnerabilities found."
+          fi
         '''
       }
     }
