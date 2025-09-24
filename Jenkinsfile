@@ -7,7 +7,7 @@ pipeline {
 
   environment {
     DOCKERHUB_CREDENTIALS_ID = 'dockerhub-creds'
-    DOCKERHUB_REPO           = 'YOUR_DOCKERHUB_USERNAME/ci-demo-app'
+    DOCKERHUB_REPO           = 'ujjwal882/ci-demo-app'
     IMAGE_TAG                = "${env.GIT_COMMIT}"
     SONARQUBE_ENV            = 'SonarQubeServer'
     SONAR_PROJECT_KEY        = 'ci-demo-api'
