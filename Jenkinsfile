@@ -10,7 +10,7 @@ pipeline {
     DOCKERHUB_REPO           = 'YOUR_DOCKERHUB_USERNAME/ci-demo-app'
     IMAGE_TAG                = "${env.GIT_COMMIT}"
     SONARQUBE_ENV            = 'SonarQubeServer'
-    SONAR_PROJECT_KEY        = 'ci-demo-api'   // 🔥 changed from ci-demo-app → match your SonarQube project
+    SONAR_PROJECT_KEY        = 'ci-demo-api'
   }
 
   options {
