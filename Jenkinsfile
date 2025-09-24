@@ -77,19 +77,21 @@ pipeline {
     }
 
     stage('Security Scan') {
-      steps {
-        sh '''
-          docker run --rm \
-            -v /var/run/docker.sock:/var/run/docker.sock \
-            aquasec/trivy:latest image \
-            --exit-code 1 --severity CRITICAL,HIGH \
-            ${DOCKERHUB_REPO}:${IMAGE_TAG} || {
-              echo "Trivy found CRITICAL/HIGH vulnerabilities."
-              exit 1
-            }
-        '''
-      }
-    }
+  steps {
+    sh '''
+      docker run --rm \
+        -v /var/run/docker.sock:/var/run/docker.sock \
+        -v $HOME/.cache/trivy:/root/.cache/ \
+        aquasec/trivy:latest image \
+        --exit-code 1 --severity CRITICAL,HIGH \
+        ${DOCKERHUB_REPO}:${IMAGE_TAG} || {
+          echo "Trivy found CRITICAL/HIGH vulnerabilities."
+          exit 1
+        }
+    '''
+  }
+}
+
 
     stage('Deploy to Staging') {
       steps {
