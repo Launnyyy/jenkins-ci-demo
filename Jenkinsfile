@@ -1,6 +1,10 @@
 pipeline {
   agent any
 
+  tools {
+    nodejs "Node18"   // must match the name you set in Manage Jenkins → Tools
+  }
+
   environment {
     DOCKERHUB_CREDENTIALS_ID = 'dockerhub-creds'
     DOCKERHUB_REPO           = 'YOUR_DOCKERHUB_USERNAME/ci-demo-app'
@@ -19,6 +23,7 @@ pipeline {
       steps {
         checkout scm
         sh 'node -v || true'
+        sh 'npm -v || true'
         sh 'docker -v || true'
       }
     }
@@ -42,7 +47,7 @@ pipeline {
       steps {
         withSonarQubeEnv("${SONARQUBE_ENV}") {
           sh '''
-            sonar-scanner \
+            npx sonar-scanner \
               -Dsonar.projectKey=${SONAR_PROJECT_KEY} \
               -Dsonar.sources=. \
               -Dsonar.exclusions=**/node_modules/**,**/*.test.js \
