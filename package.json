@@ -1,0 +1,16 @@
+{
+  "name": "ci-demo-api",
+  "version": "1.0.0",
+  "main": "server.js",
+  "scripts": {
+    "test": "jest --ci --reporters=default --coverage",
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "supertest": "^7.0.0"
+  }
+}
