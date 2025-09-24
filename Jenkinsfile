@@ -36,12 +36,12 @@ pipeline {
         '''
       }
       post {
-        always {
-          junit allowEmptyResults: true, testResults: '**/junit*.xml'
-          archiveArtifacts artifacts: 'coverage/**', allowEmptyArchive: true
-        }
-      }
+    always {
+      junit allowEmptyResults: true, testResults: 'reports/junit/*.xml'
+      archiveArtifacts artifacts: 'coverage/**', allowEmptyArchive: true
     }
+  }
+}
 
     stage('Code Quality') {
       steps {
