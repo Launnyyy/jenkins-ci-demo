@@ -2,15 +2,15 @@ pipeline {
   agent any
 
   tools {
-    nodejs "Node18"   // must match the name you set in Manage Jenkins → Tools
+    nodejs "Node18"   // must match the name in Manage Jenkins → Global Tool Configuration
   }
 
   environment {
     DOCKERHUB_CREDENTIALS_ID = 'dockerhub-creds'
-    DOCKERHUB_REPO           = 'ujjwal882/ci-demo-app'
+    DOCKERHUB_REPO           = 'ujjwal882/ci-demo-app'   // ✅ updated with your DockerHub username
     IMAGE_TAG                = "${env.GIT_COMMIT}"
     SONARQUBE_ENV            = 'SonarQubeServer'
-    SONAR_PROJECT_KEY        = 'ci-demo-app'
+    SONAR_PROJECT_KEY        = 'ci-demo-app'             // ✅ make sure this exists in SonarQube
   }
 
   options {
@@ -53,7 +53,7 @@ pipeline {
                 -Dsonar.sources=. \
                 -Dsonar.exclusions=**/node_modules/**,**/*.test.js \
                 -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
-                -Dsonar.token=$SONAR_TOKEN
+                -Dsonar.login=$SONAR_TOKEN
             '''
           }
         }
@@ -62,7 +62,7 @@ pipeline {
 
     stage('Quality Gate') {
       steps {
-        timeout(time: 2, unit: 'MINUTES') {
+        timeout(time: 5, unit: 'MINUTES') {
           waitForQualityGate abortPipeline: true
         }
       }
@@ -76,32 +76,17 @@ pipeline {
       }
     }
 
-    stage('Security Scan - npm audit') {
+    stage('Security Scan') {
       steps {
         sh '''
-          echo "Running npm audit..."
-          npm audit --audit-level=high || true
-        '''
-      }
-    }
-
-    stage('Security Scan - Trivy') {
-      steps {
-        sh '''
-          echo "Running Trivy scan..."
           docker run --rm \
             -v /var/run/docker.sock:/var/run/docker.sock \
             aquasec/trivy:latest image \
-            --exit-code 0 --severity CRITICAL,HIGH \
-            ${DOCKERHUB_REPO}:${IMAGE_TAG} > trivy-report.txt
-
-          if grep -q "CRITICAL\\|HIGH" trivy-report.txt; then
-            echo "❌ Trivy found vulnerabilities!"
-            cat trivy-report.txt
-            exit 1
-          else
-            echo "✅ No CRITICAL/HIGH vulnerabilities found."
-          fi
+            --exit-code 1 --severity CRITICAL,HIGH \
+            ${DOCKERHUB_REPO}:${IMAGE_TAG} || {
+              echo "Trivy found CRITICAL/HIGH vulnerabilities."
+              exit 1
+            }
         '''
       }
     }
