@@ -10,7 +10,7 @@ pipeline {
     DOCKERHUB_REPO           = 'YOUR_DOCKERHUB_USERNAME/ci-demo-app'
     IMAGE_TAG                = "${env.GIT_COMMIT}"
     SONARQUBE_ENV            = 'SonarQubeServer'
-    SONAR_PROJECT_KEY        = 'ci-demo-app'
+    SONAR_PROJECT_KEY        = 'ci-demo-api'   // 🔥 changed from ci-demo-app → match your SonarQube project
   }
 
   options {
@@ -44,22 +44,21 @@ pipeline {
     }
 
     stage('Code Quality') {
-  steps {
-    withSonarQubeEnv("${SONARQUBE_ENV}") {
-      withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
-        sh '''
-          npx sonar-scanner \
-            -Dsonar.projectKey=${SONAR_PROJECT_KEY} \
-            -Dsonar.sources=. \
-            -Dsonar.exclusions=**/node_modules/**,**/*.test.js \
-            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
-            -Dsonar.login=$SONAR_TOKEN
-        '''
+      steps {
+        withSonarQubeEnv("${SONARQUBE_ENV}") {
+          withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
+            sh '''
+              npx sonar-scanner \
+                -Dsonar.projectKey=${SONAR_PROJECT_KEY} \
+                -Dsonar.sources=. \
+                -Dsonar.exclusions=**/node_modules/**,**/*.test.js \
+                -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
+                -Dsonar.token=$SONAR_TOKEN
+            '''
+          }
+        }
       }
     }
-  }
-}
-
 
     stage('Quality Gate') {
       steps {
