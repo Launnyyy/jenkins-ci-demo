@@ -1,0 +1,7 @@
+services:
+  api-prod:
+    image: ${DOCKERHUB_REPO:-ci-demo-api}:${IMAGE_TAG:-latest}
+    container_name: api-prod
+    ports:
+      - "8080:3000"
+    restart: unless-stopped
