@@ -17,3 +17,7 @@
     "cross-spawn": "7.0.5"
   }
 }
+"jest-junit": {
+  "outputDirectory": "./reports/junit",
+  "outputName": "junit.xml"
+}
