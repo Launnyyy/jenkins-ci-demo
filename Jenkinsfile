@@ -76,12 +76,12 @@ pipeline {
       }
     }
 
-    stage('Security Scan') {
+   stage('Security Scan') {
   steps {
     sh '''
       docker run --rm \
         -v /var/run/docker.sock:/var/run/docker.sock \
-        -v $HOME/.cache/trivy:/root/.cache/ \
+        -v $WORKSPACE/.trivy-cache:/root/.cache/ \
         aquasec/trivy:latest image \
         --exit-code 1 --severity CRITICAL,HIGH \
         ${DOCKERHUB_REPO}:${IMAGE_TAG} || {
@@ -91,6 +91,7 @@ pipeline {
     '''
   }
 }
+
 
 
     stage('Deploy to Staging') {
