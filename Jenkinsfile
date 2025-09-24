@@ -81,7 +81,7 @@ pipeline {
     sh '''
       docker run --rm \
         -v /var/run/docker.sock:/var/run/docker.sock \
-        -v $WORKSPACE/.trivy-cache:/root/.cache/ \
+        -v /Users/ujjwalroshan/.trivy-cache:/root/.cache/ \
         aquasec/trivy:latest image \
         --exit-code 1 --severity CRITICAL,HIGH \
         ${DOCKERHUB_REPO}:${IMAGE_TAG} || {
@@ -91,6 +91,7 @@ pipeline {
     '''
   }
 }
+
 
 
 
