@@ -2,15 +2,15 @@ pipeline {
   agent any
 
   tools {
-    nodejs "Node18"   // matches your NodeJS tool name in Manage Jenkins → Tools
+    nodejs "Node18"   // must match the name you set in Manage Jenkins → Tools
   }
 
   environment {
     DOCKERHUB_CREDENTIALS_ID = 'dockerhub-creds'
-    DOCKERHUB_REPO           = 'ujjwal882/ci-demo-app'
+    DOCKERHUB_REPO           = 'YOUR_DOCKERHUB_USERNAME/ci-demo-app'
     IMAGE_TAG                = "${env.GIT_COMMIT}"
     SONARQUBE_ENV            = 'SonarQubeServer'
-    SONAR_PROJECT_KEY        = 'ci-demo-app'
+    SONAR_PROJECT_KEY        = 'ci-demo-api'
   }
 
   options {
@@ -21,10 +21,7 @@ pipeline {
   stages {
     stage('Checkout') {
       steps {
-        // Explicit git checkout so Jenkins knows what to fetch
-        git branch: 'main',
-            url: 'https://github.com/Launnyyy/jenkins-ci-demo.git',
-            credentialsId: 'github-creds'  // replace with your GitHub PAT creds ID if private
+        checkout scm
         sh 'node -v || true'
         sh 'npm -v || true'
         sh 'docker -v || true'
@@ -34,7 +31,7 @@ pipeline {
     stage('Install & Test') {
       steps {
         sh '''
-          npm ci || npm install --legacy-peer-deps --unsafe-perm=true
+          npm ci || npm install
           npx jest --ci --coverage
         '''
       }
