@@ -44,18 +44,22 @@ pipeline {
     }
 
     stage('Code Quality') {
-      steps {
-        withSonarQubeEnv("${SONARQUBE_ENV}") {
-          sh '''
-            npx sonar-scanner \
-              -Dsonar.projectKey=${SONAR_PROJECT_KEY} \
-              -Dsonar.sources=. \
-              -Dsonar.exclusions=**/node_modules/**,**/*.test.js \
-              -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
-          '''
-        }
+  steps {
+    withSonarQubeEnv("${SONARQUBE_ENV}") {
+      withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
+        sh '''
+          npx sonar-scanner \
+            -Dsonar.projectKey=${SONAR_PROJECT_KEY} \
+            -Dsonar.sources=. \
+            -Dsonar.exclusions=**/node_modules/**,**/*.test.js \
+            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
+            -Dsonar.login=$SONAR_TOKEN
+        '''
       }
     }
+  }
+}
+
 
     stage('Quality Gate') {
       steps {
