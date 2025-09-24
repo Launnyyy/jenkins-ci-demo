@@ -2,7 +2,7 @@ pipeline {
   agent any
 
   tools {
-    nodejs "Node18"  
+    nodejs "Node18"   // matches your NodeJS tool name in Manage Jenkins → Tools
   }
 
   environment {
@@ -21,8 +21,12 @@ pipeline {
   stages {
     stage('Checkout') {
       steps {
-        checkout scm
+        // Explicit git checkout so Jenkins knows what to fetch
+        git branch: 'main',
+            url: 'https://github.com/Launnyyy/jenkins-ci-demo.git',
+            credentialsId: 'github-creds'  // replace with your GitHub PAT creds ID if private
         sh 'node -v || true'
+        sh 'npm -v || true'
         sh 'docker -v || true'
       }
     }
@@ -30,7 +34,7 @@ pipeline {
     stage('Install & Test') {
       steps {
         sh '''
-          npm ci || npm install
+          npm ci || npm install --legacy-peer-deps --unsafe-perm=true
           npx jest --ci --coverage
         '''
       }
